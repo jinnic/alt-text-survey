@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Alt Text Survey</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Chart.js and Plotly via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Alt Text Survey — Barebone structure</h1>
+    </header>
+
+    <main>
+      <section class="about" aria-label="About this survey">
+        <p>
+          This survey is designed to collect feedback on the accessibility of
+          alt text in images.
+        </p>
+        <p>
+          Click an image to open details. Use the flip button in the modal to
+          reveal charts.
+        </p>
+      </section>
+      <section class="grid" id="imageGrid" aria-label="Image grid">
+        <!-- 12 placeholder images (4x3) -->
+        <!-- Images are buttons for accessibility; alt attributes are included. -->
+        <!-- We'll populate with 12 items statically for now -->
+        <button class="grid-item" data-index="1">
+          <img
+            src="https://picsum.photos/seed/1/400/300"
+            alt="Placeholder image 1"
+          />
+        </button>
+        <button class="grid-item" data-index="2">
+          <img
+            src="https://picsum.photos/seed/1/400/300"
+            alt="Placeholder image 2"
+          />
+        </button>
+        <button class="grid-item" data-index="3">
+          <img
+            src="https://picsum.photos/seed/1/400/300"
+            alt="Placeholder image 2"
+          />
+        </button>
+        <button class="grid-item" data-index="3">
+          <img
+            src="https://picsum.photos/seed/1/400/300"
+            alt="Placeholder image 2"
+          />
+        </button>
+      </section>
+    </main>
+
+    <!-- Modal (hidden by default) -->
+    <div id="modal" class="modal" aria-hidden="true">
+      <div class="modal-overlay" data-close></div>
+      <div
+        class="modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <button class="modal-close" data-close aria-label="Close modal">
+          ×
+        </button>
+        <div class="card" id="modalCard">
+          <div class="card-inner" id="cardInner">
+            <div class="card-face card-front">
+              <h2 id="modalTitle">Image details</h2>
+              <img id="modalImage" src="" alt="" />
+              <p id="modalAltText"></p>
+              <div class="modal-actions">
+                <button id="flipBtn">Flip to charts</button>
+              </div>
+            </div>
+            <div class="card-face card-back">
+              <h3>Charts</h3>
+              <div class="charts">
+                <canvas id="chartjsCanvas" width="400" height="240"></canvas>
+              </div>
+              <div id="plotlyDiv" style="width: 100%; height: 240px"></div>
+
+              <div class="modal-actions">
+                <button id="flipBackBtn">Back</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p class="site-footer">some fotter here</p>
+      <p class="site-footer">made with love by Lini & Hyojin</p>
+    </footer>
+
+    <script src="js/main.js" defer></script>
+  </body>
+</html>
