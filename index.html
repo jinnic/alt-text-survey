@@ -8,6 +8,7 @@
     <!-- Chart.js and Plotly via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -27,32 +28,8 @@
       </section>
       <section class="grid" id="imageGrid" aria-label="Image grid">
         <!-- 12 placeholder images (4x3) -->
+        <!-- Will be populated from AlttextData.csv by main.js -->
         <!-- Images are buttons for accessibility; alt attributes are included. -->
-        <!-- We'll populate with 12 items statically for now -->
-        <button class="grid-item" data-index="1">
-          <img
-            src="https://picsum.photos/seed/1/400/300"
-            alt="Placeholder image 1"
-          />
-        </button>
-        <button class="grid-item" data-index="2">
-          <img
-            src="https://picsum.photos/seed/1/400/300"
-            alt="Placeholder image 2"
-          />
-        </button>
-        <button class="grid-item" data-index="3">
-          <img
-            src="https://picsum.photos/seed/1/400/300"
-            alt="Placeholder image 2"
-          />
-        </button>
-        <button class="grid-item" data-index="3">
-          <img
-            src="https://picsum.photos/seed/1/400/300"
-            alt="Placeholder image 2"
-          />
-        </button>
       </section>
     </main>
 
@@ -71,13 +48,35 @@
         <div class="card" id="modalCard">
           <div class="card-inner" id="cardInner">
             <div class="card-face card-front">
-              <h2 id="modalTitle">Image details</h2>
-              <img id="modalImage" src="" alt="" />
-              <p id="modalAltText"></p>
+              <h2 id="modalTitle"></h2>
+
+              <div class="modal-body-row">
+                <!-- LEFT: image -->
+                <div class="modal-image-col">
+                  <img id="modalImage" src="" alt="" />
+                </div>
+
+                <!-- RIGHT: question + options -->
+                <div class="modal-options-col">
+                  <!-- <p id="modalAltText"></p> -->
+                  <!-- Alt text choices from CSV -->
+                  <form
+                    id="altOptionsForm"
+                    class="alt-options"
+                    aria-label="Alt text options"
+                  >
+                    <!-- JS will inject radio inputs here -->
+                  </form>
+                </div>
+              </div>
+
               <div class="modal-actions">
-                <button id="flipBtn">Flip to charts</button>
+                <button type="button" id="flipBtn">
+                  Submit &amp; see results
+                </button>
               </div>
             </div>
+
             <div class="card-face card-back">
               <h3>Charts</h3>
               <div class="charts">
@@ -86,7 +85,12 @@
               <div id="plotlyDiv" style="width: 100%; height: 240px"></div>
 
               <div class="modal-actions">
-                <button id="flipBackBtn">Back</button>
+                <button type="button" id="flipBackBtn">
+                  Back to alt choices
+                </button>
+                <button type="button" id="deleteVoteBtn" class="secondary">
+                  Delete my data for this image
+                </button>
               </div>
             </div>
           </div>
