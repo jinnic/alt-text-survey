@@ -261,9 +261,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         backgroundColors.push(defaultColors[index % defaultColors.length]);
         borderColors.push(
-          isUserChoice ? "#ffffff" : "rgba(255, 255, 255, 0.5)"
+          isUserChoice ? "rgba(255, 255, 255, 0)" : "rgba(255, 255, 255, 0)" //"rgba(164, 1, 234, 0.8)" :
         );
-        borderWidths.push(isUserChoice ? 5 : 2);
+        borderWidths.push(isUserChoice ? 0 : 0);
       });
 
       // ----- Chart.js pie with built-in legend (circle chips) -----
