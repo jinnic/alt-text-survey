@@ -189,40 +189,84 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Current results:", currentResults);
     console.log("User's choice:", userCurrentChoice);
 
+    // Small summary text
+    const imgTitle = document.querySelector("#image-title");
+    if (imgTitle) {
+      imgTitle.textContent = `Image: ${currentRow.ImageTitle}`;
+    }
+
     const totals = currentResults.totals || [];
-    const labels = totals.map((t) => labelForOptionId(currentRow, t.optionId));
+    if (!totals.length) {
+      console.warn("No totals in currentResults");
+      return;
+    }
+
+    const labels = totals.map((t) => labelMap[t.optionId] || t.optionId);
     const counts = totals.map((t) => Number(t.count));
 
-    /* ----- Chart.js Pie with Highlighted Choice ----- */
+    // Default colors for slices
+    const defaultColors = [
+      "#7c3aed",
+      "#06b6d4",
+      "#f59e0b",
+      "#10b981",
+      "#ef4444",
+    ];
+
+    // Find the color for user's choice
+    let userChoiceColor = null;
+    if (userCurrentChoice) {
+      const userChoiceIndex = totals.findIndex(
+        (t) => t.optionId === userCurrentChoice
+      );
+      if (userChoiceIndex !== -1) {
+        userChoiceColor = defaultColors[userChoiceIndex % defaultColors.length];
+      }
+    }
+
+    const selectedEl = document.querySelector(".alt-selected");
+    if (selectedEl) {
+      if (userCurrentChoice && userChoiceColor) {
+        const labelText = labelMap[userCurrentChoice];
+        // Apply background color only to the label text
+        selectedEl.innerHTML = `You chose: <span style="background-color: ${userChoiceColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 500;">${labelText}</span> generated text for this image.`;
+        // Clear any previous background styles on the parent element
+        selectedEl.style.backgroundColor = "";
+        selectedEl.style.color = "";
+        selectedEl.style.padding = "";
+        selectedEl.style.borderRadius = "";
+      } else {
+        selectedEl.textContent = userCurrentChoice
+          ? `You chose: ${labelMap[userCurrentChoice]} generated text for this image.`
+          : "";
+        selectedEl.style.backgroundColor = "";
+        selectedEl.style.color = "";
+        selectedEl.style.padding = "";
+        selectedEl.style.borderRadius = "";
+      }
+    }
+
     try {
       const ctx = document.getElementById("chartjsCanvas").getContext("2d");
       if (window._chartInstance) window._chartInstance.destroy();
 
-      // Default colors
-      const defaultColors = [
-        "#7c3aed",
-        "#06b6d4",
-        "#f59e0b",
-        "#10b981",
-        "#ef4444",
-      ];
-
-      // Create arrays for colors and borders based on user choice
+      // Build color + border arrays
       const backgroundColors = [];
-      const borderWidths = [];
       const borderColors = [];
+      const borderWidths = [];
 
       totals.forEach((t, index) => {
         const isUserChoice =
           userCurrentChoice && t.optionId === userCurrentChoice;
 
-        backgroundColors.push(defaultColors[index]);
-        borderWidths.push(isUserChoice ? 5 : 2);
+        backgroundColors.push(defaultColors[index % defaultColors.length]);
         borderColors.push(
           isUserChoice ? "#ffffff" : "rgba(255, 255, 255, 0.5)"
         );
+        borderWidths.push(isUserChoice ? 5 : 2);
       });
 
+      // ----- Chart.js pie with built-in legend (circle chips) -----
       window._chartInstance = new Chart(ctx, {
         type: "pie",
         data: {
@@ -241,30 +285,30 @@ document.addEventListener("DOMContentLoaded", () => {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: "bottom",
+              display: true,
               labels: {
+                usePointStyle: true,
+                pointStyle: "circle",
+                padding: 16,
                 generateLabels: function (chart) {
                   const data = chart.data;
-                  if (data.labels.length && data.datasets.length) {
-                    return data.labels.map((label, i) => {
-                      const optionId = totals[i].optionId;
-                      const isUserChoice =
-                        userCurrentChoice && optionId === userCurrentChoice;
+                  if (!data.labels.length || !data.datasets.length) return [];
 
-                      return {
-                        text: isUserChoice
-                          ? `✅ (Your choice) : ${label} `
-                          : label,
-                        fillStyle: data.datasets[0].backgroundColor[i],
-                        strokeStyle: data.datasets[0].borderColor[i],
-                        lineWidth: data.datasets[0].borderWidth[i],
-                        hidden: false,
-                        index: i,
-                        fontStyle: isUserChoice ? "bold" : "normal",
-                      };
-                    });
-                  }
-                  return [];
+                  return data.labels.map((label, i) => {
+                    const optionId = totals[i].optionId;
+                    const isUserChoice =
+                      userCurrentChoice && optionId === userCurrentChoice;
+
+                    return {
+                      text: labelMap[optionId],
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      strokeStyle: data.datasets[0].borderColor[i],
+                      lineWidth: 2,
+                      hidden: false,
+                      index: i,
+                      pointStyle: "circle",
+                    };
+                  });
                 },
                 font: function (context) {
                   const optionId = totals[context.index]?.optionId;
@@ -277,32 +321,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
               },
             },
-            title: {
-              display: true,
-              text: "Vote Distribution",
-              font: { size: 16 },
-            },
             tooltip: {
+              displayColors: true,
+              usePointStyle: true,
               callbacks: {
-                title: function () {
-                  return "";
-                },
+                // Line 2: source label
                 label: function (context) {
                   const optionId = totals[context.dataIndex].optionId;
-                  const isUserChoice =
-                    userCurrentChoice && optionId === userCurrentChoice;
-                  return isUserChoice
-                    ? `${labelMap[optionId]} ✅ (Your choice)`
-                    : labelMap[optionId];
+                  return labelMap[optionId];
                 },
+                // Line 3: vote count
                 afterLabel: function (context) {
                   const value = context.parsed || 0;
                   return `${value} votes`;
                 },
-                labelFont: function (context) {
-                  return {
-                    weight: "bold",
-                  };
+                labelFont: function () {
+                  return { weight: "bold" };
                 },
               },
             },
@@ -311,6 +345,63 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       console.log("✓ Pie chart rendered with user choice highlighted");
+
+      // ----- Custom hover/click-based alt text viewer -----
+      const legendTextContainer = document.getElementById("altText");
+      const isMobile = window.innerWidth <= 700;
+      const placeholderText = isMobile
+        ? `<p class="legend-placeholder">Tap a slice to see its alt text</p>`
+        : `<p class="legend-placeholder">Hover a slice to see its alt text</p>`;
+      legendTextContainer.innerHTML = placeholderText;
+
+      // Helper function to update alt text display
+      function updateAltTextDisplay(elements) {
+        if (!elements || !elements.length) {
+          legendTextContainer.innerHTML = placeholderText;
+          return;
+        }
+
+        const index = elements[0].index;
+        const optionId = totals[index].optionId;
+
+        const fullAlt = labelForOptionId(currentRow, optionId) || "";
+        const color = backgroundColors[index];
+
+        legendTextContainer.innerHTML = `
+      <div class="legend-text-item">
+        <p class="legend-text">${fullAlt}</p>
+      </div>
+  `;
+      }
+
+      // Attach hover handler for desktop
+      window._chartInstance.options.onHover = function (evt, elements) {
+        updateAltTextDisplay(elements);
+      };
+
+      // Attach click handler for mobile
+      window._chartInstance.options.onClick = function (evt, elements) {
+        updateAltTextDisplay(elements);
+      };
+
+      // Must update chart for handlers to take effect
+      window._chartInstance.update();
+
+      // Automatically display user's choice on load
+      if (userCurrentChoice) {
+        const userChoiceIndex = totals.findIndex(
+          (t) => t.optionId === userCurrentChoice
+        );
+        if (userChoiceIndex !== -1) {
+          // Create mock elements array to simulate selection
+          const mockElements = [
+            {
+              index: userChoiceIndex,
+            },
+          ];
+          updateAltTextDisplay(mockElements);
+        }
+      }
     } catch (e) {
       console.error("Chart.js error:", e);
     }
@@ -343,7 +434,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `${API_BASE}/api/results?imageId=${encodeURIComponent(imageId)}`
       );
       currentResults = await res.json();
-      console.log("Current results:", currentResults);
 
       renderChartsFromResults();
       cardInner.classList.add("is-flipped");

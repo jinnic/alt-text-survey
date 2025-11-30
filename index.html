@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Alt Text Survey</title>
     <link rel="stylesheet" href="css/style.css" />
-    <!-- Chart.js and Plotly via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -108,11 +107,15 @@
             </div>
 
             <div class="card-face card-back">
-              <h3>Charts</h3>
+              <h3 id="image-title"></h3>
+              <h3 class="alt-selected"></h3>
               <div class="charts">
-                <canvas id="chartjsCanvas" width="400" height="440"></canvas>
+                <div class="chart-wrapper">
+                  <canvas id="chartjsCanvas"></canvas>
+                </div>
+
+                <div id="altText" class="alt-text"></div>
               </div>
-              <div id="plotlyDiv" style="width: 100%; height: 240px"></div>
 
               <div class="modal-actions">
                 <button type="button" id="flipBackBtn">
