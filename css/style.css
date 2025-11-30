@@ -228,7 +228,7 @@ body>* {
 
 .modal-image-col img {
     width: auto;
-    height: auto;
+    height: 70%;
     display: block;
     border-radius: 4px;
     max-width: 100%;

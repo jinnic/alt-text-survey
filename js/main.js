@@ -343,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `${API_BASE}/api/results?imageId=${encodeURIComponent(imageId)}`
       );
       currentResults = await res.json();
+      console.log("Current results:", currentResults);
 
       renderChartsFromResults();
       cardInner.classList.add("is-flipped");
