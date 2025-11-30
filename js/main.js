@@ -31,6 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const deleteVoteBtn = document.getElementById("deleteVoteBtn");
   const closeButtons = document.querySelectorAll("[data-close]");
 
+  const labelMap = {
+    "alt-human": "Human",
+    "alt-ahrefs": "AHREFS",
+    "alt-asu": "ASU Image Accessibility Creator",
+    "alt-popupsmart": "Popupsmart",
+    "alt-chatgpt": "ChatGPT",
+  };
+
   /* -------------------------------------
      Load CSV dataset
   ------------------------------------- */
@@ -171,174 +179,140 @@ document.addEventListener("DOMContentLoaded", () => {
      Render REAL charts from backend
   ------------------------------------- */
   function renderChartsFromResults() {
-  if (!currentResults || !currentRow) {
-    console.warn("No results available to render");
-    return;
-  }
+    if (!currentResults || !currentRow) {
+      console.warn("No results available to render");
+      return;
+    }
 
-  console.log("Current results:", currentResults);
-  console.log("User's choice:", userCurrentChoice);
+    console.log("Current results:", currentResults);
+    console.log("User's choice:", userCurrentChoice);
 
-  const totals = currentResults.totals || [];
-  const labels = totals.map((t) => labelForOptionId(currentRow, t.optionId));
-  const counts = totals.map((t) => Number(t.count));
+    const totals = currentResults.totals || [];
+    const labels = totals.map((t) => labelForOptionId(currentRow, t.optionId));
+    const counts = totals.map((t) => Number(t.count));
 
-  /* ----- Chart.js Pie with Highlighted Choice ----- */
-  try {
-    const ctx = document.getElementById("chartjsCanvas").getContext("2d");
-    if (window._chartInstance) window._chartInstance.destroy();
+    /* ----- Chart.js Pie with Highlighted Choice ----- */
+    try {
+      const ctx = document.getElementById("chartjsCanvas").getContext("2d");
+      if (window._chartInstance) window._chartInstance.destroy();
 
-    // Default colors
-    const defaultColors = [
-      "#7c3aed", "#06b6d4", "#f59e0b", "#10b981", "#ef4444"
-    ];
+      // Default colors
+      const defaultColors = [
+        "#7c3aed",
+        "#06b6d4",
+        "#f59e0b",
+        "#10b981",
+        "#ef4444",
+      ];
 
-    // Create arrays for colors and borders based on user choice
-    const backgroundColors = [];
-    const borderWidths = [];
-    const borderColors = [];
+      // Create arrays for colors and borders based on user choice
+      const backgroundColors = [];
+      const borderWidths = [];
+      const borderColors = [];
 
-    totals.forEach((t, index) => {
-      const isUserChoice = userCurrentChoice && t.optionId === userCurrentChoice;
-      
-      backgroundColors.push(defaultColors[index]);
-      borderWidths.push(isUserChoice ? 5 : 2);
-      borderColors.push(isUserChoice ? "#ffffff" : "rgba(255, 255, 255, 0.5)");
-    });
+      totals.forEach((t, index) => {
+        const isUserChoice =
+          userCurrentChoice && t.optionId === userCurrentChoice;
 
-    window._chartInstance = new Chart(ctx, {
-      type: "pie",
-      data: {
-        labels,
-        datasets: [{
-          data: counts,
-          backgroundColor: backgroundColors,
-          borderColor: borderColors,
-          borderWidth: borderWidths,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: {
-              generateLabels: function(chart) {
-                const data = chart.data;
-                if (data.labels.length && data.datasets.length) {
-                  return data.labels.map((label, i) => {
-                    const optionId = totals[i].optionId;
-                    const isUserChoice = userCurrentChoice && optionId === userCurrentChoice;
-                    
-                    return {
-                      text: isUserChoice ? `${label} ⭐ (Your choice)` : label,
-                      fillStyle: data.datasets[0].backgroundColor[i],
-                      strokeStyle: data.datasets[0].borderColor[i],
-                      lineWidth: data.datasets[0].borderWidth[i],
-                      hidden: false,
-                      index: i,
-                      fontStyle: isUserChoice ? 'bold' : 'normal'
-                    };
-                  });
-                }
-                return [];
+        backgroundColors.push(defaultColors[index]);
+        borderWidths.push(isUserChoice ? 5 : 2);
+        borderColors.push(
+          isUserChoice ? "#ffffff" : "rgba(255, 255, 255, 0.5)"
+        );
+      });
+
+      window._chartInstance = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels,
+          datasets: [
+            {
+              data: counts,
+              backgroundColor: backgroundColors,
+              borderColor: borderColors,
+              borderWidth: borderWidths,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                generateLabels: function (chart) {
+                  const data = chart.data;
+                  if (data.labels.length && data.datasets.length) {
+                    return data.labels.map((label, i) => {
+                      const optionId = totals[i].optionId;
+                      const isUserChoice =
+                        userCurrentChoice && optionId === userCurrentChoice;
+
+                      return {
+                        text: isUserChoice
+                          ? `✅ (Your choice) : ${label} `
+                          : label,
+                        fillStyle: data.datasets[0].backgroundColor[i],
+                        strokeStyle: data.datasets[0].borderColor[i],
+                        lineWidth: data.datasets[0].borderWidth[i],
+                        hidden: false,
+                        index: i,
+                        fontStyle: isUserChoice ? "bold" : "normal",
+                      };
+                    });
+                  }
+                  return [];
+                },
+                font: function (context) {
+                  const optionId = totals[context.index]?.optionId;
+                  const isUserChoice =
+                    userCurrentChoice && optionId === userCurrentChoice;
+                  return {
+                    weight: isUserChoice ? "bold" : "normal",
+                    size: isUserChoice ? 14 : 12,
+                  };
+                },
               },
-              font: function(context) {
-                const optionId = totals[context.index]?.optionId;
-                const isUserChoice = userCurrentChoice && optionId === userCurrentChoice;
-                return {
-                  weight: isUserChoice ? 'bold' : 'normal',
-                  size: isUserChoice ? 14 : 12
-                };
-              }
-            }
+            },
+            title: {
+              display: true,
+              text: "Vote Distribution",
+              font: { size: 16 },
+            },
+            tooltip: {
+              callbacks: {
+                title: function () {
+                  return "";
+                },
+                label: function (context) {
+                  const optionId = totals[context.dataIndex].optionId;
+                  const isUserChoice =
+                    userCurrentChoice && optionId === userCurrentChoice;
+                  return isUserChoice
+                    ? `${labelMap[optionId]} ✅ (Your choice)`
+                    : labelMap[optionId];
+                },
+                afterLabel: function (context) {
+                  const value = context.parsed || 0;
+                  return `${value} votes`;
+                },
+                labelFont: function (context) {
+                  return {
+                    weight: "bold",
+                  };
+                },
+              },
+            },
           },
-          title: {
-            display: true,
-            text: 'Vote Distribution',
-            font: { size: 16 }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                const optionId = totals[context.dataIndex].optionId;
-                const isUserChoice = userCurrentChoice && optionId === userCurrentChoice;
-                
-                return isUserChoice 
-                  ? `${label}: ${value} votes (${percentage}%) ⭐ Your choice`
-                  : `${label}: ${value} votes (${percentage}%)`;
-              }
-            }
-          }
-        }
-      },
-    });
+        },
+      });
 
-    console.log("✓ Pie chart rendered with user choice highlighted");
-  } catch (e) {
-    console.error("Chart.js error:", e);
+      console.log("✓ Pie chart rendered with user choice highlighted");
+    } catch (e) {
+      console.error("Chart.js error:", e);
+    }
   }
-}
-
-  // function renderChartsFromResults() {
-  //   if (!currentResults || !currentRow) return;
-
-  //   const totals = currentResults.totals || [];
-
-  //   const labels = totals.map((t) => labelForOptionId(currentRow, t.optionId));
-  //   const counts = totals.map((t) => Number(t.count));
-
-  //   /* ----- Chart.js Pie ----- */
-  //   try {
-  //     const ctx = document.getElementById("chartjsCanvas").getContext("2d");
-
-  //     if (window._chartInstance) window._chartInstance.destroy();
-
-  //     window._chartInstance = new Chart(ctx, {
-  //       type: "pie",
-  //       data: {
-  //         labels,
-  //         datasets: [
-  //           {
-  //             data: counts,
-  //             backgroundColor: [
-  //               "#7c3aed",
-  //               "#06b6d4",
-  //               "#f59e0b",
-  //               "#10b981",
-  //               "#ef4444",
-  //             ],
-  //           },
-  //         ],
-  //       },
-  //       options: { responsive: true, maintainAspectRatio: false },
-  //     });
-  //   } catch (e) {
-  //     console.warn("Chart.js error", e);
-  //   }
-
-    /* ----- Plotly Bar ----- */
-    // try {
-    //   const trace = {
-    //     x: labels,
-    //     y: counts,
-    //     type: "bar",
-    //     marker: { color: "#7c3aed" },
-    //   };
-    //   const layout = {
-    //     margin: { t: 10, l: 40, r: 10, b: 60 },
-    //     height: 240,
-    //   };
-    //   Plotly.newPlot("plotlyDiv", [trace], layout, { displayModeBar: false });
-    // } catch (e) {
-    //   console.warn("Plotly error", e);
-    // }
-  // }
 
   /* -------------------------------------
      Submit button → POST then GET then flip
@@ -413,7 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
   flipBackBtn.addEventListener("click", () =>
     cardInner.classList.remove("is-flipped")
   );
-   
+
   // Clear user choice when modal closes
   userCurrentChoice = null;
 
@@ -469,10 +443,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   aboutBtn.addEventListener("click", openAboutModal);
   closeAboutBtn.addEventListener("click", closeAboutModal);
-  closeAboutButtons.forEach((b) => b.addEventListener("click", closeAboutModal));
-  
+  closeAboutButtons.forEach((b) =>
+    b.addEventListener("click", closeAboutModal)
+  );
+
   // Close about modal when clicking overlay
-  aboutModal.querySelector(".modal-overlay").addEventListener("click", closeAboutModal);
+  aboutModal
+    .querySelector(".modal-overlay")
+    .addEventListener("click", closeAboutModal);
 
   // Statistics functionality
 
@@ -481,165 +459,171 @@ document.addEventListener("DOMContentLoaded", () => {
    Add this to your main.js
 ===================================================== */
 
-// Add these variables at the top with your other declarations
-let allImageResults = {};
+  // Add these variables at the top with your other declarations
+  let allImageResults = {};
 
-/* -------------------------------------
+  /* -------------------------------------
    Fetch all results from API for all images
 ------------------------------------- */
-async function fetchAllResults() {
-  try {
-    console.log("Fetching results for all images...");
-    
-    const promises = dataset.map(async (row) => {
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/results?imageId=${encodeURIComponent(row.ImageId)}`
-        );
-        const data = await res.json();
-        return { imageId: row.ImageId, data: data };
-      } catch (err) {
-        console.error(`Error fetching image ${row.ImageId}:`, err);
-        return { imageId: row.ImageId, data: null };
-      }
-    });
+  async function fetchAllResults() {
+    try {
+      console.log("Fetching results for all images...");
 
-    const results = await Promise.all(promises);
-    
-    // Store results by imageId
-    results.forEach(result => {
-      if (result.data) {
-        allImageResults[result.imageId] = result.data;
-      }
-    });
-
-    console.log("✓ Fetched results for", Object.keys(allImageResults).length, "images");
-    return allImageResults;
-  } catch (err) {
-    console.error("Error fetching all results:", err);
-    return {};
-  }
-}
-
-/* -------------------------------------
-   Aggregate vote totals across all images
-------------------------------------- */
-function aggregateVoteTotals(allResults) {
-  const aggregated = {
-    "alt-human": 0,
-    "alt-ahrefs": 0,
-    "alt-asu": 0,
-    "alt-popupsmart": 0,
-    "alt-chatgpt": 0
-  };
-
-  Object.values(allResults).forEach(result => {
-    if (result && result.totals) {
-      result.totals.forEach(item => {
-        if (aggregated.hasOwnProperty(item.optionId)) {
-          aggregated[item.optionId] += Number(item.count);
+      const promises = dataset.map(async (row) => {
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/results?imageId=${encodeURIComponent(row.ImageId)}`
+          );
+          const data = await res.json();
+          return { imageId: row.ImageId, data: data };
+        } catch (err) {
+          console.error(`Error fetching image ${row.ImageId}:`, err);
+          return { imageId: row.ImageId, data: null };
         }
       });
+
+      const results = await Promise.all(promises);
+
+      // Store results by imageId
+      results.forEach((result) => {
+        if (result.data) {
+          allImageResults[result.imageId] = result.data;
+        }
+      });
+
+      console.log(
+        "✓ Fetched results for",
+        Object.keys(allImageResults).length,
+        "images"
+      );
+      return allImageResults;
+    } catch (err) {
+      console.error("Error fetching all results:", err);
+      return {};
     }
-  });
+  }
 
-  return aggregated;
-}
+  /* -------------------------------------
+   Aggregate vote totals across all images
+------------------------------------- */
+  function aggregateVoteTotals(allResults) {
+    const aggregated = {
+      "alt-human": 0,
+      "alt-ahrefs": 0,
+      "alt-asu": 0,
+      "alt-popupsmart": 0,
+      "alt-chatgpt": 0,
+    };
 
-/* -------------------------------------
+    Object.values(allResults).forEach((result) => {
+      if (result && result.totals) {
+        result.totals.forEach((item) => {
+          if (aggregated.hasOwnProperty(item.optionId)) {
+            aggregated[item.optionId] += Number(item.count);
+          }
+        });
+      }
+    });
+
+    return aggregated;
+  }
+
+  /* -------------------------------------
    Render Plotly chart in statistics modal
 ------------------------------------- */
-function renderStatisticsChart(aggregated) {
-  const labelMap = {
-    "alt-human": "Human",
-    "alt-ahrefs": "AHREFS",
-    "alt-asu": "ASU",
-    "alt-popupsmart": "Popupsmart",
-    "alt-chatgpt": "ChatGPT"
-  };
+  function renderStatisticsChart(aggregated) {
+    const labelMap = {
+      "alt-human": "Human",
+      "alt-ahrefs": "AHREFS",
+      "alt-asu": "ASU",
+      "alt-popupsmart": "Popupsmart",
+      "alt-chatgpt": "ChatGPT",
+    };
 
-  const labels = Object.keys(aggregated).map(key => labelMap[key]);
-  const counts = Object.values(aggregated);
+    const labels = Object.keys(aggregated).map((key) => labelMap[key]);
+    const counts = Object.values(aggregated);
 
-  // Create Plotly bar chart
-  const data = [{
-    x: labels,
-    y: counts,
-    type: "bar",
-    marker: {
-      color: ["#7c3aed", "#06b6d4", "#f59e0b", "#10b981", "#ef4444"],
-      opacity: 0.8,
-      line: {
-        color: "rgba(0,0,0,0.3)",
-        width: 1.5
-      }
-    },
-    text: counts.map(c => c.toString()),
-    textposition: "outside",
-    textfont: {
-      size: 14,
-      color: "#111827",
-      weight: "bold"
-    },
-    hovertemplate: "<b>%{x}</b><br>Total Votes: %{y}<extra></extra>"
-  }];
+    // Create Plotly bar chart
+    const data = [
+      {
+        x: labels,
+        y: counts,
+        type: "bar",
+        marker: {
+          color: ["#7c3aed", "#06b6d4", "#f59e0b", "#10b981", "#ef4444"],
+          opacity: 0.8,
+          line: {
+            color: "rgba(0,0,0,0.3)",
+            width: 1.5,
+          },
+        },
+        text: counts.map((c) => c.toString()),
+        textposition: "outside",
+        textfont: {
+          size: 14,
+          color: "#111827",
+          weight: "bold",
+        },
+        hovertemplate: "<b>%{x}</b><br>Total Votes: %{y}<extra></extra>",
+      },
+    ];
 
-  const layout = {
-    title: {
-      text: "Total Votes Across All Images",
-      font: { size: 20, color: "#7a3cff", weight: "bold" }
-    },
-    xaxis: {
-      title: "Alt Text Source",
-      titlefont: { size: 14 },
-      tickfont: { size: 12 },
-      tickangle: -45
-    },
-    yaxis: {
-      title: "Number of Votes",
-      titlefont: { size: 14 },
-      tickfont: { size: 12 }
-    },
-    height: 400,
-    margin: { t: 80, b: 100, l: 70, r: 40 },
-    plot_bgcolor: "#fafafa",
-    paper_bgcolor: "#ffffff",
-    showlegend: false
-  };
+    const layout = {
+      title: {
+        text: "Total Votes Across All Images",
+        font: { size: 20, color: "#7a3cff", weight: "bold" },
+      },
+      xaxis: {
+        title: "Alt Text Source",
+        titlefont: { size: 14 },
+        tickfont: { size: 12 },
+        tickangle: -45,
+      },
+      yaxis: {
+        title: "Number of Votes",
+        titlefont: { size: 14 },
+        tickfont: { size: 12 },
+      },
+      height: 400,
+      margin: { t: 80, b: 100, l: 70, r: 40 },
+      plot_bgcolor: "#fafafa",
+      paper_bgcolor: "#ffffff",
+      showlegend: false,
+    };
 
-  const config = {
-    displayModeBar: true,
-    displaylogo: false,
-    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
-    responsive: true
-  };
+    const config = {
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
+      responsive: true,
+    };
 
-  try {
-    Plotly.newPlot("statsPlotlyDiv", data, layout, config);
-    console.log("✓ Statistics chart rendered");
-  } catch (e) {
-    console.error("Plotly error:", e);
+    try {
+      Plotly.newPlot("statsPlotlyDiv", data, layout, config);
+      console.log("✓ Statistics chart rendered");
+    } catch (e) {
+      console.error("Plotly error:", e);
+    }
   }
-}
 
-/* -------------------------------------
+  /* -------------------------------------
    Open Statistics Modal
 ------------------------------------- */
-async function openStatisticsModal() {
-  const statsModal = document.getElementById("statsModal");
-  const statsContent = document.getElementById("statsContent");
-  
-  if (!statsModal) {
-    console.error("Statistics modal not found");
-    return;
-  }
+  async function openStatisticsModal() {
+    const statsModal = document.getElementById("statsModal");
+    const statsContent = document.getElementById("statsContent");
 
-  // Show modal
-  statsModal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+    if (!statsModal) {
+      console.error("Statistics modal not found");
+      return;
+    }
 
-  // Show loading message
-  statsContent.innerHTML = `
+    // Show modal
+    statsModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    // Show loading message
+    statsContent.innerHTML = `
     <div style="text-align: center; padding: 2rem;">
       <p style="font-size: 1.2rem; color: #7a3cff;">Loading statistics...</p>
       <div style="margin-top: 1rem;">
@@ -648,23 +632,31 @@ async function openStatisticsModal() {
     </div>
   `;
 
-  try {
-    // Fetch all results
-    await fetchAllResults();
+    try {
+      // Fetch all results
+      await fetchAllResults();
 
-    // Aggregate totals
-    const aggregated = aggregateVoteTotals(allImageResults);
-    
-    // Calculate statistics
-    const totalVotes = Object.values(aggregated).reduce((sum, val) => sum + val, 0);
-    const imagesWithVotes = Object.values(allImageResults).filter(result => {
-      if (!result || !result.totals) return false;
-      const total = result.totals.reduce((sum, item) => sum + Number(item.count), 0);
-      return total > 0;
-    }).length;
+      // Aggregate totals
+      const aggregated = aggregateVoteTotals(allImageResults);
 
-    // Render content
-    statsContent.innerHTML = `
+      // Calculate statistics
+      const totalVotes = Object.values(aggregated).reduce(
+        (sum, val) => sum + val,
+        0
+      );
+      const imagesWithVotes = Object.values(allImageResults).filter(
+        (result) => {
+          if (!result || !result.totals) return false;
+          const total = result.totals.reduce(
+            (sum, item) => sum + Number(item.count),
+            0
+          );
+          return total > 0;
+        }
+      ).length;
+
+      // Render content
+      statsContent.innerHTML = `
       <div class="stats-summary">
         <div class="stat-card">
           <h3>Total Votes</h3>
@@ -680,7 +672,9 @@ async function openStatisticsModal() {
         </div>
         <div class="stat-card">
           <h3>Completion</h3>
-          <p class="stat-number">${Math.round((imagesWithVotes / dataset.length) * 100)}%</p>
+          <p class="stat-number">${Math.round(
+            (imagesWithVotes / dataset.length) * 100
+          )}%</p>
         </div>
       </div>
       
@@ -702,75 +696,96 @@ async function openStatisticsModal() {
             <tr>
               <td>Human</td>
               <td>${aggregated["alt-human"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-human"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-human"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>AHREFS</td>
               <td>${aggregated["alt-ahrefs"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-ahrefs"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-ahrefs"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>ASU</td>
               <td>${aggregated["alt-asu"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-asu"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-asu"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>Popupsmart</td>
               <td>${aggregated["alt-popupsmart"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-popupsmart"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-popupsmart"] / totalVotes) * 100).toFixed(
+                      1
+                    )
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>ChatGPT</td>
               <td>${aggregated["alt-chatgpt"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-chatgpt"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-chatgpt"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
           </tbody>
         </table>
       </div>
     `;
 
-    // Render chart
-    renderStatisticsChart(aggregated);
-
-  } catch (err) {
-    console.error("Error loading statistics:", err);
-    statsContent.innerHTML = `
+      // Render chart
+      renderStatisticsChart(aggregated);
+    } catch (err) {
+      console.error("Error loading statistics:", err);
+      statsContent.innerHTML = `
       <div style="text-align: center; padding: 2rem;">
         <p style="color: #ef4444;">Error loading statistics. Please try again.</p>
       </div>
     `;
+    }
   }
-}
 
-/* -------------------------------------
+  /* -------------------------------------
    Close Statistics Modal
 ------------------------------------- */
-function closeStatisticsModal() {
-  const statsModal = document.getElementById("statsModal");
-  if (statsModal) {
-    statsModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+  function closeStatisticsModal() {
+    const statsModal = document.getElementById("statsModal");
+    if (statsModal) {
+      statsModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
   }
-}
 
-/* -------------------------------------
+  /* -------------------------------------
    Open Statistics Modal
 ------------------------------------- */
-async function openStatisticsModal() {
-  const statsModal = document.getElementById("statsModal");
-  const statsContent = document.getElementById("statsContent");
-  
-  if (!statsModal) {
-    console.error("Statistics modal not found");
-    return;
-  }
+  async function openStatisticsModal() {
+    const statsModal = document.getElementById("statsModal");
+    const statsContent = document.getElementById("statsContent");
 
-  // Show modal
-  statsModal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+    if (!statsModal) {
+      console.error("Statistics modal not found");
+      return;
+    }
 
-  // Show loading message
-  statsContent.innerHTML = `
+    // Show modal
+    statsModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    // Show loading message
+    statsContent.innerHTML = `
     <div style="text-align: center; padding: 2rem;">
       <p style="font-size: 1.2rem; color: #7a3cff;">Loading statistics...</p>
       <div style="margin-top: 1rem;">
@@ -779,23 +794,31 @@ async function openStatisticsModal() {
     </div>
   `;
 
-  try {
-    // Fetch all results
-    await fetchAllResults();
+    try {
+      // Fetch all results
+      await fetchAllResults();
 
-    // Aggregate totals
-    const aggregated = aggregateVoteTotals(allImageResults);
-    
-    // Calculate statistics
-    const totalVotes = Object.values(aggregated).reduce((sum, val) => sum + val, 0);
-    const imagesWithVotes = Object.values(allImageResults).filter(result => {
-      if (!result || !result.totals) return false;
-      const total = result.totals.reduce((sum, item) => sum + Number(item.count), 0);
-      return total > 0;
-    }).length;
+      // Aggregate totals
+      const aggregated = aggregateVoteTotals(allImageResults);
 
-    // Render content
-    statsContent.innerHTML = `
+      // Calculate statistics
+      const totalVotes = Object.values(aggregated).reduce(
+        (sum, val) => sum + val,
+        0
+      );
+      const imagesWithVotes = Object.values(allImageResults).filter(
+        (result) => {
+          if (!result || !result.totals) return false;
+          const total = result.totals.reduce(
+            (sum, item) => sum + Number(item.count),
+            0
+          );
+          return total > 0;
+        }
+      ).length;
+
+      // Render content
+      statsContent.innerHTML = `
       <div class="stats-summary">
         <div class="stat-card">
           <h3>Total Votes</h3>
@@ -811,7 +834,9 @@ async function openStatisticsModal() {
         </div>
         <div class="stat-card">
           <h3>Completion</h3>
-          <p class="stat-number">${Math.round((imagesWithVotes / dataset.length) * 100)}%</p>
+          <p class="stat-number">${Math.round(
+            (imagesWithVotes / dataset.length) * 100
+          )}%</p>
         </div>
       </div>
       
@@ -833,86 +858,107 @@ async function openStatisticsModal() {
             <tr>
               <td>Human</td>
               <td>${aggregated["alt-human"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-human"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-human"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>AHREFS</td>
               <td>${aggregated["alt-ahrefs"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-ahrefs"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-ahrefs"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>ASU</td>
               <td>${aggregated["alt-asu"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-asu"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-asu"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>Popupsmart</td>
               <td>${aggregated["alt-popupsmart"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-popupsmart"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-popupsmart"] / totalVotes) * 100).toFixed(
+                      1
+                    )
+                  : 0
+              }%</td>
             </tr>
             <tr>
               <td>ChatGPT</td>
               <td>${aggregated["alt-chatgpt"]}</td>
-              <td>${totalVotes > 0 ? ((aggregated["alt-chatgpt"] / totalVotes) * 100).toFixed(1) : 0}%</td>
+              <td>${
+                totalVotes > 0
+                  ? ((aggregated["alt-chatgpt"] / totalVotes) * 100).toFixed(1)
+                  : 0
+              }%</td>
             </tr>
           </tbody>
         </table>
       </div>
     `;
 
-    // Render chart
-    renderStatisticsChart(aggregated);
+      // Render chart
+      renderStatisticsChart(aggregated);
 
-    // Re-attach close button event listener after content is rendered
+      // Re-attach close button event listener after content is rendered
+      const closeStatsBtn = document.getElementById("closeStatsBtn");
+      if (closeStatsBtn) {
+        closeStatsBtn.addEventListener("click", closeStatisticsModal);
+      }
+    } catch (err) {
+      console.error("Error loading statistics:", err);
+      statsContent.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <p style="color: #ef4444;">Error loading statistics. Please try again.</p>
+      </div>
+    `;
+    }
+  }
+
+  /* -------------------------------------
+   Initialize Statistics Modal Event Listeners
+   Call this in DOMContentLoaded
+------------------------------------- */
+  function initializeStatisticsModal() {
+    const statsModal = document.getElementById("statsModal");
+
+    // Close button in modal header (×)
+    const closeStatsButtons = document.querySelectorAll("[data-close-stats]");
+    closeStatsButtons.forEach((btn) => {
+      btn.addEventListener("click", closeStatisticsModal);
+    });
+
+    // Close button at bottom (this one is added dynamically, so we handle it in openStatisticsModal)
     const closeStatsBtn = document.getElementById("closeStatsBtn");
     if (closeStatsBtn) {
       closeStatsBtn.addEventListener("click", closeStatisticsModal);
     }
 
-  } catch (err) {
-    console.error("Error loading statistics:", err);
-    statsContent.innerHTML = `
-      <div style="text-align: center; padding: 2rem;">
-        <p style="color: #ef4444;">Error loading statistics. Please try again.</p>
-      </div>
-    `;
-  }
-}
-
-/* -------------------------------------
-   Initialize Statistics Modal Event Listeners
-   Call this in DOMContentLoaded
-------------------------------------- */
-function initializeStatisticsModal() {
-  const statsModal = document.getElementById("statsModal");
-  
-  // Close button in modal header (×)
-  const closeStatsButtons = document.querySelectorAll("[data-close-stats]");
-  closeStatsButtons.forEach(btn => {
-    btn.addEventListener("click", closeStatisticsModal);
-  });
-
-  // Close button at bottom (this one is added dynamically, so we handle it in openStatisticsModal)
-  const closeStatsBtn = document.getElementById("closeStatsBtn");
-  if (closeStatsBtn) {
-    closeStatsBtn.addEventListener("click", closeStatisticsModal);
-  }
-
-  // Close when clicking overlay
-  if (statsModal) {
-    const overlay = statsModal.querySelector(".modal-overlay");
-    if (overlay) {
-      overlay.addEventListener("click", closeStatisticsModal);
+    // Close when clicking overlay
+    if (statsModal) {
+      const overlay = statsModal.querySelector(".modal-overlay");
+      if (overlay) {
+        overlay.addEventListener("click", closeStatisticsModal);
+      }
     }
+
+    console.log("✓ Statistics modal initialized");
   }
 
-  console.log("✓ Statistics modal initialized");
-}
-
-statsBtn.addEventListener("click", async () => {
-  closeFloatingMenu();
-  await openStatisticsModal();
-});
+  statsBtn.addEventListener("click", async () => {
+    closeFloatingMenu();
+    await openStatisticsModal();
+  });
 
   // statsBtn.addEventListener("click", async () => {
   //   try {
@@ -924,7 +970,6 @@ statsBtn.addEventListener("click", async () => {
   //   }
   //   closeFloatingMenu();
   // });
-
 
   // Smooth scroll for menu links
   floatingMenu.querySelectorAll('a[href^="#"]').forEach((anchor) => {

@@ -95,7 +95,8 @@ body>* {
 }
 
 #modalTitle {
-    white-space: pre-line; /* Preserves line breaks */
+    white-space: pre-line;
+    /* Preserves line breaks */
 }
 
 .modal[aria-hidden="false"] {
@@ -154,13 +155,17 @@ body>* {
 }
 
 .card-inner.is-flipped .card-back {
-    pointer-events: auto; /* Enable when visible */
-    z-index: 10; /* Above card-front when flipped */
+    pointer-events: auto;
+    /* Enable when visible */
+    z-index: 10;
+    /* Above card-front when flipped */
 }
 
 .card-inner.is-flipped .card-front {
-    pointer-events: none; /* Disable when not visible */
-    z-index: 5; /* Below card-back when flipped */
+    pointer-events: none;
+    /* Disable when not visible */
+    z-index: 5;
+    /* Below card-back when flipped */
 }
 
 .card-face {
@@ -216,9 +221,9 @@ body>* {
 }
 
 .modal-image-col {
-    display: flex; 
-    align-items: flex-start; 
-    justify-content: center; 
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .modal-image-col img {
@@ -377,132 +382,132 @@ footer {
    FLOATING MENU BUTTON
 ------------------------------------------------------- */
 .floating-menu-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #7c3aed;
-  color: white;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
-  z-index: 999;
-  transition: all 0.3s ease;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #7c3aed;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    z-index: 999;
+    transition: all 0.3s ease;
 }
 
 .floating-menu-btn:hover {
-  background: #6d28d9;
-  transform: scale(1.1);
+    background: #6d28d9;
+    transform: scale(1.1);
 }
 
 .floating-menu-btn:active {
-  transform: scale(0.95);
+    transform: scale(0.95);
 }
 
 /* -------------------------------------------------------
    FLOATING MENU PANEL
 ------------------------------------------------------- */
 .floating-menu {
-  position: fixed;
-  bottom: 100px;
-  right: 30px;
-  width: 280px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 998;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
 }
 
 .floating-menu[aria-hidden="false"] {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .floating-menu-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .floating-menu-header h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #1f2937;
+    margin: 0;
+    font-size: 18px;
+    color: #1f2937;
 }
 
 .close-menu-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  line-height: 1;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
 }
 
 .close-menu-btn:hover {
-  color: #1f2937;
+    color: #1f2937;
 }
 
 .floating-menu-list {
-  list-style: none;
-  padding: 12px 0;
-  margin: 0;
+    list-style: none;
+    padding: 12px 0;
+    margin: 0;
 }
 
 .floating-menu-list li {
-  margin: 0;
+    margin: 0;
 }
 
 .floating-menu-list a,
 .floating-menu-list .menu-action-btn {
-  display: block;
-  padding: 12px 20px;
-  color: #374151;
-  text-decoration: none;
-  transition: background 0.2s ease;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  font-family: inherit;
+    display: block;
+    padding: 12px 20px;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .floating-menu-list a:hover,
 .floating-menu-list .menu-action-btn:hover {
-  background: #f3f4f6;
+    background: #f3f4f6;
 }
 
 /* Mobile responsive */
 @media (max-width: 640px) {
-  .floating-menu-btn {
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    font-size: 22px;
-  }
+    .floating-menu-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+    }
 
-  .floating-menu {
-    bottom: 85px;
-    right: 20px;
-    left: 20px;
-    width: auto;
-  }
+    .floating-menu {
+        bottom: 85px;
+        right: 20px;
+        left: 20px;
+        width: auto;
+    }
 }
 
 /* -------------------------------------------------------
@@ -745,7 +750,9 @@ footer {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive */
@@ -753,15 +760,15 @@ footer {
     .stats-summary {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .stat-number {
         font-size: 2rem;
     }
-    
+
     .stats-table {
         font-size: 0.9rem;
     }
-    
+
     .stats-table th,
     .stats-table td {
         padding: 0.75rem 0.5rem;
