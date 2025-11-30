@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const API_BASE = "https://alt-text-survey.onrender.com";
 
-  // Participant ID per browser/session
+  // Participant ID per browser/sessionurl
   const PARTICIPANT_KEY = "alt_survey_participant";
   let participantId = localStorage.getItem(PARTICIPANT_KEY);
   if (!participantId) {
@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "alt-chatgpt": "ChatGPT",
   };
 
+  const url = "https://jinnic.github.io/alt-text-survey/";
+
   /* -------------------------------------
      Load CSV dataset
   ------------------------------------- */
@@ -74,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.dataset.index = index;
 
       const img = document.createElement("img");
-      img.src = imageUrl;
+      img.src = url + "/img/" + imageId + ".jpg";
       img.alt = `Image ${imageId}`;
       img.loading = "lazy";
       img.decoding = "async";
