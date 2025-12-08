@@ -676,6 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
         title: "Number of Votes",
         titlefont: { size: 14 },
         tickfont: { size: 12 },
+        range: [0, Math.max(...counts) * 1.2],
       },
       height: 400,
       margin: { t: 80, b: 100, l: 70, r: 40 },
