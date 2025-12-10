@@ -104,7 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
     modalImage.alt = row.Humantext || "";
     modalImage.dataset.imageId = row.ImageId;
 
-    modalTitle.textContent = `Choose alt text that best describes the image to the visually impaired: \n${row.ImageTitle}`;
+    modalTitle.textContent = `Choose alt text that best describes the image to the visually impaired or users who cannot
+    access the image: \n${row.ImageTitle}`;
 
     renderAltOptions(row);
 
